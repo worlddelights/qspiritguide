@@ -1,5 +1,4 @@
 name = "qspiritguide"
-type = "javascript"
 compatibility_date = "2025-01-01"
 compatibility_flags = ["nodejs_compat"]
 
@@ -20,8 +19,3 @@ vars = { ENVIRONMENT = "development", API_URL = "http://localhost:3000" }
 
 [env.production]
 vars = { ENVIRONMENT = "production" }
-
-# Build configuration
-[build]
-command = "npm run build"
-cwd = "."
