@@ -1,11 +1,18 @@
 import { useState, useRef, useEffect } from 'react';
-import { Send, ShieldCheck, RotateCcw } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Send, ShieldCheck, RotateCcw, Sparkles } from 'lucide-react';
 
 interface Message {
   role: 'user' | 'assistant';
   content: string;
 }
+
+type ChatFontSize = 'small' | 'medium' | 'large';
+
+const FONT_SIZE_OPTIONS: { value: ChatFontSize; label: string }[] = [
+  { value: 'small', label: 'Small' },
+  { value: 'medium', label: 'Med' },
+  { value: 'large', label: 'Large' },
+];
 
 interface QuantumDialogueProps {
   signature: string;
@@ -22,13 +29,20 @@ export default function QuantumDialogue({
   messages,
   onSendMessage,
   isGenerating,
-  streamingText
+  streamingText,
 }: QuantumDialogueProps) {
   const [input, setInput] = useState('');
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const [fontSize, setFontSize] = useState<ChatFontSize>('medium');
+  const messagesRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    const messagesElement = messagesRef.current;
+    if (messagesElement) {
+      messagesElement.scrollTo({
+        top: messagesElement.scrollHeight,
+        behavior: 'smooth',
+      });
+    }
   }, [messages, streamingText]);
 
   const handleSend = () => {
@@ -38,37 +52,70 @@ export default function QuantumDialogue({
   };
 
   return (
-    <div className="flex flex-col h-[700px] max-h-[80vh] w-full max-w-4xl mx-auto bg-card/80 backdrop-blur-md border border-border/50 rounded-3xl overflow-hidden shadow-2xl">
-      {/* Top Bar / HUD */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-border/50 bg-background/50">
+    <section
+      className={`quantum-dialogue quantum-dialogue--font-${fontSize}`}
+      aria-label="Quantum dialogue"
+    >
+      <div className="quantum-dialogue__hud">
         <div className="flex items-center gap-3">
-          <div className="bg-primary/20 text-primary border border-primary/30 rounded-full px-3 py-1 text-xs font-mono font-bold">
-            {signature}
-          </div>
-          <div className="text-green-400 flex items-center gap-1 text-xs font-semibold">
+          <div className="quantum-dialogue__signature">{signature}</div>
+          <div className="quantum-dialogue__privacy">
             <ShieldCheck className="h-4 w-4" />
-            100% Off-Grid
+            100% Off-Grid <span className="hidden sm:inline">• Local model active</span>
           </div>
         </div>
-        <button 
-          onClick={onReset}
-          className="text-muted-foreground hover:text-foreground transition-colors p-2"
-          title="Reset Journey"
-        >
-          <RotateCcw className="h-5 w-5" />
-        </button>
+        <div className="quantum-dialogue__actions">
+          <div className="quantum-dialogue__font-size" role="group" aria-label="Chat text size">
+            <span className="quantum-dialogue__font-label">Text size</span>
+            {FONT_SIZE_OPTIONS.map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                className={fontSize === option.value ? 'is-active' : ''}
+                onClick={() => setFontSize(option.value)}
+                aria-pressed={fontSize === option.value}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+          <button
+            type="button"
+            onClick={onReset}
+            className="quantum-dialogue__reset"
+            title="Start a new journey"
+            aria-label="Start a new journey"
+          >
+            <RotateCcw className="h-5 w-5" />
+          </button>
+        </div>
       </div>
 
-      {/* Message Feed */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-6">
+      <div ref={messagesRef} className="quantum-dialogue__messages">
         {messages.length === 0 && !isGenerating && (
-          <div className="text-center text-muted-foreground my-10 max-w-md mx-auto">
-            <p className="mb-4">The guide has awakened. How can it help illuminate your path today?</p>
-            <div className="flex flex-col gap-2">
-              <button onClick={() => onSendMessage("I feel stuck between staying in my safe job and switching to a new career.")} className="text-xs bg-secondary hover:bg-secondary/80 p-2 rounded-lg text-left">
+          <div className="quantum-dialogue__welcome">
+            <Sparkles className="mx-auto mb-4 h-6 w-6 text-amber-200" />
+            <p>
+              The guide has awakened within your constellation. What would you like to bring into
+              the clearing?
+            </p>
+            <div className="quantum-dialogue__suggestions">
+              <button
+                type="button"
+                onClick={() =>
+                  onSendMessage(
+                    'I feel stuck between staying in my safe job and switching to a new career.'
+                  )
+                }
+              >
                 "I feel stuck between staying in my safe job and switching to a new career."
               </button>
-              <button onClick={() => onSendMessage("I'm turning 35 and feel like I'm running out of time.")} className="text-xs bg-secondary hover:bg-secondary/80 p-2 rounded-lg text-left">
+              <button
+                type="button"
+                onClick={() =>
+                  onSendMessage("I'm turning 35 and feel like I'm running out of time.")
+                }
+              >
                 "I'm turning 35 and feel like I'm running out of time."
               </button>
             </div>
@@ -77,31 +124,27 @@ export default function QuantumDialogue({
 
         {messages.map((msg, i) => (
           <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[80%] rounded-2xl px-5 py-3 ${
-              msg.role === 'user' 
-                ? 'bg-primary text-primary-foreground rounded-tr-sm' 
-                : 'bg-secondary text-secondary-foreground rounded-tl-sm border border-border/50'
-            }`}>
-              <p className="whitespace-pre-wrap leading-relaxed text-sm">{msg.content}</p>
+            <div
+              className={`quantum-dialogue__message ${msg.role === 'user' ? 'quantum-dialogue__message--user' : 'quantum-dialogue__message--guide'}`}
+            >
+              <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
             </div>
           </div>
         ))}
-        
+
         {isGenerating && (
           <div className="flex justify-start">
-            <div className="max-w-[80%] rounded-2xl rounded-tl-sm px-5 py-3 bg-secondary text-secondary-foreground border border-border/50 shadow-[0_0_15px_rgba(168,85,247,0.15)]">
-              <p className="whitespace-pre-wrap leading-relaxed text-sm">
+            <div className="quantum-dialogue__message quantum-dialogue__message--guide">
+              <p className="whitespace-pre-wrap leading-relaxed">
                 {streamingText}
                 <span className="inline-block w-2 h-4 bg-primary ml-1 animate-pulse align-middle" />
               </p>
             </div>
           </div>
         )}
-        <div ref={bottomRef} />
       </div>
 
-      {/* Input Area */}
-      <div className="p-4 border-t border-border/50 bg-background/50">
+      <div className="quantum-dialogue__input-area">
         <div className="flex gap-2 items-end">
           <textarea
             value={input}
@@ -113,18 +156,18 @@ export default function QuantumDialogue({
               }
             }}
             placeholder="Share your thoughts..."
-            className="flex-1 max-h-32 min-h-12 bg-background border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none"
+            className="quantum-dialogue__input"
             rows={1}
           />
-          <button 
+          <button
             onClick={handleSend}
             disabled={!input.trim() || isGenerating}
-            className="bg-primary text-primary-foreground p-3 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:bg-primary/90 transition-colors h-12 w-12 flex items-center justify-center"
+            className="quantum-dialogue__send"
           >
             <Send className="h-5 w-5" />
           </button>
         </div>
       </div>
-    </div>
+    </section>
   );
 }

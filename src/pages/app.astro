@@ -1,6 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import AppPage from '../components/AppPage';
+import Footer from '../components/Footer';
 ---
 
 <Layout
@@ -9,4 +10,5 @@ import AppPage from '../components/AppPage';
   canonicalPath="/app"
 >
   <AppPage client:load />
+  <Footer />
 </Layout>

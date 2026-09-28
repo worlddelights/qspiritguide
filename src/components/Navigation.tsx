@@ -1,4 +1,3 @@
-import { motion, AnimatePresence } from 'framer-motion';
 import { Compass, Menu, X, Sparkles } from 'lucide-react';
 import { useState } from 'react';
 
@@ -49,31 +48,25 @@ export default function Navigation({ currentPath = '/' }: NavigationProps) {
                   : 'text-muted-foreground hover:text-primary'
               }`}
             >
-              <motion.div whileHover={{ scale: 1.05 }}>
+              <div className="navigation__link-motion">
                 {link.label}
                 {active && (
-                  <motion.div
-                    layoutId="activeIndicator"
-                    className="bg-primary absolute right-0 -bottom-1 left-0 h-0.5 rounded-full"
-                    transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                  />
+                  <div className="bg-primary absolute right-0 -bottom-1 left-0 h-0.5 rounded-full" />
                 )}
-              </motion.div>
+              </div>
             </a>
           );
         })}
 
         {/* Large Primary Call to Action Button */}
         <a href="/app" data-testid="link-nav-cta">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+          <button
             data-testid="button-launch-app-nav"
             className="font-heading bg-primary text-primary-foreground hover:bg-primary/90 flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-bold shadow-lg transition-all hover:shadow-xl"
           >
             <Sparkles className="h-4 w-4" />
             Consult Spirit Guide
-          </motion.button>
+          </button>
         </a>
       </div>
 
@@ -88,42 +81,31 @@ export default function Navigation({ currentPath = '/' }: NavigationProps) {
       </button>
 
       {/* Mobile Nav Menu */}
-      <AnimatePresence mode="wait">
-        {isOpen && (
-          <motion.div
-            key="mobile-menu"
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.25, ease: 'easeOut' }}
+      {isOpen && (
+        <div className="navigation__mobile-menu">
+          <div
             className="bg-card border-border/60 absolute top-full right-4 left-4 z-50 mt-2 flex w-[calc(100%-2rem)] flex-col gap-5 rounded-2xl border p-6 shadow-2xl md:hidden"
           >
-            {navLinks.map((link, idx) => {
+            {navLinks.map((link) => {
               const active = isCurrent(link.href);
               return (
-                <motion.a
+                <a
                   key={link.id}
                   href={link.href}
                   onClick={() => setIsOpen(false)}
                   data-testid={`link-${link.id}-mobile`}
-                  initial={{ opacity: 0, x: -15 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: idx * 0.05, duration: 0.2 }}
-                  className={`w-fit text-lg font-medium transition-colors ${
+                  className={`navigation__mobile-link w-fit text-lg font-medium transition-colors ${
                     active
                       ? 'text-primary font-bold'
                       : 'text-foreground hover:text-primary'
                   }`}
                 >
                   {link.label}
-                </motion.a>
+                </a>
               );
             })}
-            <motion.div
+            <div
               className="border-border/40 border-t pt-4"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.2 }}
             >
               <a
                 href="/app"
@@ -138,10 +120,10 @@ export default function Navigation({ currentPath = '/' }: NavigationProps) {
                   Consult Spirit Guide
                 </button>
               </a>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            </div>
+          </div>
+        </div>
+      )}
     </nav>
   );
 }

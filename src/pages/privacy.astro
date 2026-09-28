@@ -1,6 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import PrivacyPage from '../components/PrivacyPage';
+import Footer from '../components/Footer';
 ---
 
 <Layout
@@ -9,4 +10,5 @@ import PrivacyPage from '../components/PrivacyPage';
   canonicalPath="/privacy"
 >
   <PrivacyPage client:load />
+  <Footer />
 </Layout>

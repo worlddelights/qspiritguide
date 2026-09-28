@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion';
 import { ShieldCheck, Lock, HardDrive, EyeOff } from 'lucide-react';
 import Navigation from './Navigation';
-import Footer from './Footer';
 
 export default function PrivacyPage() {
   return (
@@ -84,7 +83,6 @@ export default function PrivacyPage() {
         </div>
       </main>
 
-      <Footer />
     </div>
   );
 }

@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion';
 import { BookOpen, HelpCircle, Shield, Cpu, Compass } from 'lucide-react';
 import Navigation from './Navigation';
-import Footer from './Footer';
 
 export default function GuidePage() {
   const faqs = [
@@ -99,7 +98,6 @@ export default function GuidePage() {
         </div>
       </main>
 
-      <Footer />
     </div>
   );
 }

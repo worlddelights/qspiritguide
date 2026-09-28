@@ -1,15 +1,15 @@
 import { openDB, type DBSchema, type IDBPDatabase } from 'idb';
 
 export interface VaultSession {
-  id: string;                      // UUID
+  id: string; // UUID
   timestamp: number;
-  signature: string;               // Multiverse coordinate
-  seed32: number;                  // Sampling seed
+  signature: string; // Multiverse coordinate
+  seed32: number; // Sampling seed
   symbols: [string, string, string];
-  promptId: string;                // e.g. "forest-02"
-  pendulumState: { theta: number; omega: number; timeDeltaMs: number };
-  contextSummary?: string;         // Local rolling summary used for generation
-  compactionVersion?: string;      // Version of the summary prompt and format
+  promptId: string; // e.g. "forest-02"
+  resonanceCapture: { phase: number; velocity: number; elapsedMs: number };
+  contextSummary?: string; // Local rolling summary used for generation
+  compactionVersion?: string; // Version of the summary prompt and format
   messages: Array<{ role: 'user' | 'assistant'; content: string; timestamp: number }>;
 }
 

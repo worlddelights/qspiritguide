@@ -1,6 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import GuidePage from '../components/GuidePage';
+import Footer from '../components/Footer';
 ---
 
 <Layout
@@ -9,4 +10,5 @@ import GuidePage from '../components/GuidePage';
   canonicalPath="/guide"
 >
   <GuidePage client:load />
+  <Footer />
 </Layout>

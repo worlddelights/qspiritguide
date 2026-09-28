@@ -1,5 +1,4 @@
-import { motion } from 'framer-motion';
-import { Compass, Heart, Lock, BookOpen, Sparkles, ShieldCheck } from 'lucide-react';
+import { Compass, Heart, Sparkles, ShieldCheck } from 'lucide-react';
 
 export default function Footer() {
   return (
@@ -8,13 +7,7 @@ export default function Footer() {
         {/* Top Grid */}
         <div className="grid grid-cols-1 gap-10 md:grid-cols-3">
           {/* Brand Column */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-            className="space-y-4"
-          >
+          <div className="space-y-4">
             <a href="/" className="text-primary flex items-center gap-3">
               <Compass className="h-8 w-8 text-red-400" />
               <span className="font-heading text-foreground text-2xl font-bold">
@@ -28,16 +21,10 @@ export default function Footer() {
               <ShieldCheck className="text-primary h-4 w-4" />
               <span>100% Private & Off-Grid (Runs in your browser)</span>
             </div>
-          </motion.div>
+          </div>
 
           {/* Center Column: Quick Links */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="space-y-4"
-          >
+          <div className="space-y-4">
             <h4 className="font-heading text-foreground text-sm font-bold uppercase tracking-wider">
               Navigation
             </h4>
@@ -79,16 +66,10 @@ export default function Footer() {
                 </a>
               </li>
             </ul>
-          </motion.div>
+          </div>
 
           {/* Right Column: CTA */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="flex flex-col justify-center space-y-4"
-          >
+          <div className="flex flex-col justify-center space-y-4">
             <div className="space-y-2">
               <h4 className="font-heading text-foreground font-bold">
                 Ready to Explore?
@@ -98,36 +79,29 @@ export default function Footer() {
               </p>
             </div>
             <a href="/app" className="w-full" data-testid="link-footer-cta">
-              <motion.button
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
+              <button
                 data-testid="button-footer-launch-app"
                 className="bg-primary text-primary-foreground hover:bg-primary/90 flex w-full items-center justify-center gap-2 rounded-full px-6 py-3 font-bold shadow-lg transition-all hover:shadow-xl"
               >
                 <Sparkles className="h-5 w-5" />
                 Consult Spirit Guide
-              </motion.button>
+              </button>
             </a>
-          </motion.div>
+          </div>
         </div>
 
         {/* Divider */}
         <div className="border-border/40 my-6 border-t" />
 
         {/* Bottom: Copyright */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          className="text-muted-foreground/70 flex flex-col items-center justify-between gap-4 text-center text-xs md:flex-row"
-        >
+        <div className="text-muted-foreground/70 flex flex-col items-center justify-between gap-4 text-center text-xs md:flex-row">
           <p>
             &copy; {new Date().getFullYear()} qSpirit Guide. All rights reserved.
           </p>
           <p className="flex items-center justify-center gap-1">
             Traversing the cosmic web <Heart className="h-3 w-3 text-red-400" /> in alignment
           </p>
-        </motion.div>
+        </div>
       </div>
     </footer>
   );

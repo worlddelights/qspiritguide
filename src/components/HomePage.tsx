@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion';
 import {
   Heart,
   Sparkles,
@@ -12,7 +11,6 @@ import {
   Infinity as InfinityIcon,
 } from 'lucide-react';
 import Navigation from './Navigation';
-import Footer from './Footer';
 
 
 
@@ -28,11 +26,7 @@ const Hero = () => {
       <div className="bg-accent/30 absolute right-[-5%] bottom-[10%] -z-10 h-[400px] w-[400px] rounded-full blur-3xl" />
 
       <div className="relative z-10 w-full space-y-8 md:w-1/2">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-        >
+        <div className="home-reveal">
           <span className="font-hand text-primary mb-4 inline-block -rotate-2 text-2xl">
             Welcome back, traveler!
           </span>
@@ -61,12 +55,7 @@ const Hero = () => {
           </p>
 
           {/* Trust Badges */}
-          <motion.div
-            className="flex flex-wrap gap-4 pt-4"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-          >
+          <div className="home-reveal home-reveal--delay-1 flex flex-wrap gap-4 pt-4">
             {[
               { icon: Orbit, label: 'Infinite Paths', color: 'text-indigo-600' },
               { icon: Lock, label: 'Secure Session', color: 'text-green-600' },
@@ -77,12 +66,9 @@ const Hero = () => {
               },
               { icon: Heart, label: 'Source-Connected', color: 'text-red-600' },
             ].map((badge, idx) => (
-              <motion.div
+              <div
                 key={idx}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.4 + idx * 0.1 }}
-                className="bg-secondary/30 border-border/40 flex items-center justify-center gap-2 rounded-full border px-3 py-2"
+                className="home-reveal home-reveal--delay-2 bg-secondary/30 border-border/40 flex items-center justify-center gap-2 rounded-full border px-3 py-2"
               >
                 <badge.icon
                   className={`h-4 w-4 flex-shrink-0 ${badge.color}`}
@@ -90,19 +76,14 @@ const Hero = () => {
                 <span className="text-foreground text-xs font-semibold">
                   {badge.label}
                 </span>
-              </motion.div>
+              </div>
             ))}
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       </div>
 
       <div className="relative mt-12 w-full md:mt-0 md:w-1/2">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8, rotate: 5 }}
-          animate={{ opacity: 1, scale: 1, rotate: 0 }}
-          transition={{ duration: 0.8, ease: 'easeOut' }}
-          className="relative z-10"
-        >
+        <div className="home-reveal home-reveal--image relative z-10">
           <img
             src="/images/w6fBE5m6WYpbmECpuglt--1--kehj7.jpg"
             alt="Person standing on a peak looking at a cosmic sphere"
@@ -110,11 +91,7 @@ const Hero = () => {
           />
 
           {/* Floating Cards */}
-          <motion.div
-            animate={{ y: [0, -10, 0] }}
-            transition={{ repeat: Infinity, duration: 4, ease: 'easeInOut' }}
-            className="bg-card absolute -bottom-8 -left-4 flex max-w-[200px] items-center gap-3 rounded-2xl p-4 shadow-lg md:left-10"
-          >
+          <div className="home-float bg-card absolute -bottom-8 -left-4 flex max-w-[200px] items-center gap-3 rounded-2xl p-4 shadow-lg md:left-10">
             <div className="rounded-full bg-indigo-100 p-2 text-indigo-600">
               <Sparkles size={20} />
             </div>
@@ -122,19 +99,10 @@ const Hero = () => {
               <p className="text-sm font-bold">99% Entangled</p>
               <p className="text-muted-foreground text-xs">Real-time sync</p>
             </div>
-          </motion.div>
+          </div>
 
           {/* Second Badge */}
-          <motion.div
-            animate={{ y: [0, 10, 0] }}
-            transition={{
-              repeat: Infinity,
-              duration: 4,
-              ease: 'easeInOut',
-              delay: 0.5,
-            }}
-            className="bg-card absolute -top-4 -right-4 flex max-w-[200px] items-center gap-3 rounded-2xl p-4 shadow-lg md:-right-8"
-          >
+          <div className="home-float home-float--reverse bg-card absolute -top-4 -right-4 flex max-w-[200px] items-center gap-3 rounded-2xl p-4 shadow-lg md:-right-8">
             <div className="rounded-full bg-purple-100 p-2 text-purple-600">
               <Users size={20} />
             </div>
@@ -142,8 +110,8 @@ const Hero = () => {
               <p className="text-sm font-bold">500K+ Explorers</p>
               <p className="text-muted-foreground text-xs">Vast web network</p>
             </div>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       </div>
     </section>
   );
@@ -162,23 +130,17 @@ const FeatureCard = ({
   delay: number;
   testId: string;
 }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 30 }}
-    whileInView={{ opacity: 1, y: 0 }}
-    viewport={{ once: true }}
-    transition={{ duration: 0.5, delay }}
-    whileHover={{ y: -10 }}
+  <div
+    className={`home-reveal home-hover-lift home-reveal--delay-${Math.round(delay * 10)}`}
     data-testid={testId}
   >
     <div className="bg-card h-full overflow-hidden rounded-[2rem] border-none shadow-lg transition-shadow duration-300 hover:shadow-xl">
       <div className="flex h-full flex-col p-0">
         <div className="bg-secondary/30 relative flex h-56 items-center justify-center overflow-hidden">
-          <motion.img
+          <img
             src={img}
             alt={title}
-            className="absolute h-full w-full object-cover"
-            whileHover={{ scale: 1.05 }}
-            transition={{ duration: 0.4 }}
+            className="home-feature-image absolute h-full w-full object-cover"
           />
         </div>
         <div className="flex flex-1 flex-col items-center p-8 text-center">
@@ -189,7 +151,7 @@ const FeatureCard = ({
         </div>
       </div>
     </div>
-  </motion.div>
+  </div>
 );
 
 const Features = () => {
@@ -275,12 +237,9 @@ const Community = () => {
 
         <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
           {benefits.map((benefit, idx) => (
-            <motion.div
+            <div
               key={idx}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: idx * 0.1 }}
+              className="home-reveal"
             >
               <div className="bg-card h-full rounded-[2rem] border-none shadow-lg transition-shadow duration-300 hover:shadow-xl">
                 <div className="flex h-full flex-col p-8">
@@ -304,7 +263,7 @@ const Community = () => {
                   </p>
                 </div>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>
@@ -318,13 +277,7 @@ const QuoteSection = () => {
       id="wisdom"
       className="bg-secondary/20 flex items-center justify-center px-6 py-24 text-center"
     >
-      <motion.div
-        className="relative max-w-3xl"
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.6 }}
-      >
+      <div className="home-reveal relative max-w-3xl">
         <h3
           data-testid="text-quote"
           className="font-hand text-foreground/80 text-3xl leading-relaxed md:text-5xl"
@@ -335,7 +288,7 @@ const QuoteSection = () => {
         <div className="font-heading text-primary mt-8 font-bold">
           — Pierre Teilhard de Chardin
         </div>
-      </motion.div>
+      </div>
     </section>
   );
 };
@@ -350,20 +303,14 @@ export default function Home() {
       <QuoteSection />
       <section id="cta" className="px-6 py-24">
         <div className="mx-auto max-w-6xl">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="mb-12 space-y-4 text-center"
-          >
+          <div className="home-reveal mb-12 space-y-4 text-center">
             <h2 className="font-heading text-foreground text-4xl font-bold md:text-5xl">
               Ready to find your alignment?
             </h2>
             <p className="text-muted-foreground mx-auto max-w-2xl text-lg">
               Choose your path and start your private navigation journey today.
             </p>
-          </motion.div>
+          </div>
 
           <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
             {[
@@ -397,15 +344,10 @@ export default function Home() {
                 icon: <Lock className="text-primary h-8 w-8" />,
                 buttonText: 'View Privacy',
               },
-            ].map((cta, idx) => (
-              <motion.div
+            ].map((cta) => (
+              <div
                 key={cta.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: idx * 0.1, duration: 0.5 }}
-                whileHover={{ y: -8 }}
-                className="bg-card flex h-full flex-col items-center gap-4 rounded-[2rem] p-8 text-center shadow-lg transition-shadow hover:shadow-xl"
+                className="home-reveal home-hover-lift bg-card flex h-full flex-col items-center gap-4 rounded-[2rem] p-8 text-center shadow-lg transition-shadow hover:shadow-xl"
               >
                 <div className="bg-primary/15 flex h-16 w-16 items-center justify-center rounded-full">
                   {cta.icon}
@@ -424,12 +366,11 @@ export default function Home() {
                     {cta.buttonText}
                   </button>
                 </a>
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>
       </section>
-      <Footer />
     </div>
   );
 }
