@@ -11,17 +11,13 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "workers:dev": "wrangler dev",
-    "workers:deploy": "wrangler deploy",
     "format": "prettier --write .",
     "lint": "eslint src/"
   },
   "dependencies": {
-    "@astrojs/cloudflare": "^14.3.3",
     "@astrojs/react": "^7.0.0",
     "@huggingface/transformers": "^4.3.0",
     "astro": "^7.3.5",
-    "cloudflare": "^7.2.0",
     "clsx": "^2.1.1",
     "framer-motion": "^13.4.4",
     "idb": "^8.0.3",

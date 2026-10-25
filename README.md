@@ -31,31 +31,17 @@ Next investigate "Quantum Principles" or "Core Pillars" for your teaching that r
 
 ## 🏗️ Architecture
 
-A modern full-stack web application combining **Astro** for the front-end with **Cloudflare Workers** for serverless APIs, featuring Turnstile authentication, CAPTCHA protection, and a D1 database.
+A browser-based guide built with **Astro** and published as a static site on **Cloudflare Pages**. The production deployment does not require Workers, D1, KV, or server-side authentication.
 
 ### Frontend
 
-- **Astro**: Static site generation with server-side rendering (SSR)
+- **Astro**: Static site generation
 * **TypeScript**: Type-safe JavaScript throughout
-* **Cloudflare Pages**: Deployment platform
-
-### Backend (Serverless)
-
-- **Cloudflare Workers**: Serverless API endpoints
-* **Cloudflare D1**: SQLite database at the edge
-* **Cloudflare KV**: Session and cache storage
-
-### Security
-
-- **Cloudflare Turnstile**: CAPTCHA protection (privacy-first alternative to reCAPTCHA)
-* **Cloudflare Workers Auth**: Protected API endpoints
-* **Session Management**: KV-backed secure sessions
+* **Cloudflare Pages**: Static hosting with GitHub Actions deployments from `main`
 
 ## 📋 Prerequisites
 
-* Node.js 18+ and pnpm
-* Cloudflare account (free tier supported)
-* Wrangler CLI: `pnpm add -g wrangler`
+* Node.js 22.12.0 or newer and pnpm
 
 ## 🚀 Quick Start
 
@@ -68,14 +54,10 @@ pnpm install
 ### 2. Local Development
 
 ```bash
-# Run Astro dev server
 pnpm run dev
-
-# In another terminal, run Cloudflare Workers locally
-pnpm run workers:dev
 ```
 
-Visit `http://localhost:3000` for the Astro front-end and Wrangler will serve workers on a local port.
+Visit the local URL printed by Astro.
 
 ### 3. Build for Production
 
@@ -83,147 +65,66 @@ Visit `http://localhost:3000` for the Astro front-end and Wrangler will serve wo
 pnpm run build
 ```
 
-### 4. Deploy
+### 4. Publish
 
-```bash
-# Deploy to Cloudflare
-pnpm run workers:deploy
-```
+Push a change to `main`; GitHub Actions builds the static site and deploys `dist/` to Cloudflare Pages.
 
 ## 📁 Project Structure
 
 ```
 qspiritguide/
+├── public/                   # Static assets
 ├── src/
 │   ├── pages/                 # Astro pages (routes)
 │   ├── components/            # Reusable Astro components
 │   ├── layouts/               # Page layouts
-│   ├── middleware.ts          # Auth and logging middleware
-│   └── env.d.ts              # Type definitions for Cloudflare bindings
-├── functions/
-│   ├── auth.ts               # Authentication endpoints
-│   ├── turnstile.ts          # CAPTCHA verification
-│   └── [other-apis].ts       # Additional API endpoints
-├── wrangler.toml             # Cloudflare Workers config
-├── astro.config.mjs          # Astro configuration
-├── tsconfig.json             # TypeScript configuration
-└── package.json              # Dependencies and scripts
+│   └── styles/                # Global styles
+├── astro.config.mjs           # Astro configuration
+├── tsconfig.json              # TypeScript configuration
+└── package.json               # Dependencies and scripts
 ```
 
 ## ⚙️ Configuration
 
-### Cloudflare Setup
+### Cloudflare Pages setup
 
-1. **D1 Database**: Update `wrangler.toml` with your database ID
+1. Create a Pages project named `qspiritguide` with `main` as its production branch. Use direct uploads; the GitHub Actions workflow in this repository handles builds and deployments.
+2. In that Pages project's **Custom domains** settings, attach `qspirit.guide`.
+3. Create a Cloudflare API token with permission to edit Pages for the target account.
+4. Add `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` as GitHub Actions repository secrets.
 
-   ```toml
-   database_id = "your-database-id"
-   ```
-
-2. **Turnstile**: Add your Turnstile site key to environment variables
-
-   ```bash
-   # .env or wrangler.toml
-   TURNSTILE_SITE_KEY=xxx
-   TURNSTILE_SECRET_KEY=xxx
-   ```
-
-3. **KV Namespace**: Configure session storage
-
-   ```toml
-   [[kv_namespaces]]
-   binding = "SESSION_STORE"
-   id = "your-kv-id"
-   ```
-
-## 🔐 Authentication Flow
-
-1. User submits credentials with Turnstile token
-2. Turnstile is verified server-side
-3. Credentials are validated against D1 database
-4. Session token is generated and stored in KV
-5. Token is returned to client for future requests
-
-## 📚 API Endpoints
-
-### POST `/api/auth`
-
-Handles login, registration, logout, and email verification.
-
-**Request:**
-
-```json
-{
-  "action": "login",
-  "email": "user@example.com",
-  "password": "password",
-  "turnstile_token": "..."
-}
-```
-
-### POST `/api/verify-turnstile`
-
-Verifies Cloudflare Turnstile tokens.
-
-**Request:**
-
-```json
-{
-  "token": "3D86db...",
-  "remoteip": "192.0.2.1"
-}
-```
+The workflow deploys the `qspiritguide` Pages project on each push to `main`; Cloudflare serves it at the attached `https://qspirit.guide` custom domain. It builds with `pnpm build` and uploads only generated `dist/` static assets.
 
 ## 🧠 BMAD Method Integration
 
 This project is organized to support the BMAD (Break down, Map, Adjust, Detail) method:
 
-* **Break down**: Architecture separated into clear layers (frontend, API, database)
-* **Map**: Middleware and routing handled by Astro and Workers
-* **Adjust**: Configuration through wrangler.toml and astro.config.mjs
-* **Detail**: Implementation in specific function files with clear responsibilities
+* **Break down**: Separate routes, components, and styles
+* **Map**: Routes and client-side components are connected through Astro
+* **Adjust**: Build and deployment behavior is configured in Astro and GitHub Actions
+* **Detail**: Implement pages and reusable components in their respective directories
 
 ## 📝 Development Guidelines
 
 ### Code Organization
 
-- Keep API endpoints focused and single-purpose
 * Use TypeScript for type safety
 * Follow naming conventions: camelCase for functions, PascalCase for components
 
 ### Adding Features
 
 1. Create new `.astro` files in `src/pages/` for routes
-2. Add API handlers in `functions/` directory
-3. Create reusable components in `src/components/`
-4. Update `wrangler.toml` if adding new bindings
-
-### Database Migrations
-
-Store D1 migrations in a `migrations/` directory and execute via Wrangler CLI.
+2. Create reusable components in `src/components/`
+3. Push changes to `main` to publish them
 
 ## 🚢 Deployment
 
-### To Cloudflare Pages (Frontend)
-
-```bash
-pnpm run build
-# Push dist/ to your git repo connected to Cloudflare Pages
-```
-
-### To Cloudflare Workers (API)
-
-```bash
-pnpm run workers:deploy
-```
+Cloudflare Pages publishes automatically from GitHub Actions on every push to `main`. See [Cloudflare Pages setup](#cloudflare-pages-setup) above for the one-time project and secret configuration.
 
 ## 📖 Resources
 
 * [Astro Documentation](https://docs.astro.build/)
-* [Cloudflare Workers](https://developers.cloudflare.com/workers/)
-* [Cloudflare D1](https://developers.cloudflare.com/d1/)
-* [Cloudflare Turnstile](https://developers.cloudflare.com/turnstile/)
-* [Wrangler CLI](https://developers.cloudflare.com/workers/wrangler/)
+* [Cloudflare Pages](https://developers.cloudflare.com/pages/)
 
 ## 📄 License
 
