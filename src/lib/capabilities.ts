@@ -14,9 +14,9 @@ export async function detectDeviceCapabilities(): Promise<DeviceCapabilityReport
   const logicalCores = navigator.hardwareConcurrency || 4;
   
   // Basic mobile detection
-  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-    navigator.userAgent
-  );
+  const isMobile =
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
   const report: DeviceCapabilityReport = {
     hasWebGPU: false,
@@ -43,7 +43,7 @@ export async function detectDeviceCapabilities(): Promise<DeviceCapabilityReport
         
         // Tier 1 (High Performance — 1B Model)
         // For testing, we also just check if it's a desktop with >= 4GB RAM
-        if ((report.maxStorageBufferSize >= 1073741824 || !isMobile) && deviceMemoryGB >= 4) {
+        if (!isMobile && deviceMemoryGB >= 4) {
            report.recommendedTier = '1B-WebGPU';
         } else {
            // Tier 2 (Standard / Mobile WebGPU — 360M Model)

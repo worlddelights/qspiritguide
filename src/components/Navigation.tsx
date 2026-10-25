@@ -82,45 +82,39 @@ export default function Navigation({ currentPath = '/' }: NavigationProps) {
 
       {/* Mobile Nav Menu */}
       {isOpen && (
-        <div className="navigation__mobile-menu">
-          <div
-            className="bg-card border-border/60 absolute top-full right-4 left-4 z-50 mt-2 flex w-[calc(100%-2rem)] flex-col gap-5 rounded-2xl border p-6 shadow-2xl md:hidden"
-          >
-            {navLinks.map((link) => {
-              const active = isCurrent(link.href);
-              return (
-                <a
-                  key={link.id}
-                  href={link.href}
-                  onClick={() => setIsOpen(false)}
-                  data-testid={`link-${link.id}-mobile`}
-                  className={`navigation__mobile-link w-fit text-lg font-medium transition-colors ${
-                    active
-                      ? 'text-primary font-bold'
-                      : 'text-foreground hover:text-primary'
-                  }`}
-                >
-                  {link.label}
-                </a>
-              );
-            })}
-            <div
-              className="border-border/40 border-t pt-4"
-            >
+        <div className="navigation__mobile-menu bg-card border-border/60 absolute top-full right-4 left-4 z-50 mt-2 flex flex-col gap-5 rounded-2xl border p-6 shadow-2xl md:hidden">
+          {navLinks.map((link) => {
+            const active = isCurrent(link.href);
+            return (
               <a
-                href="/app"
-                className="block w-full"
+                key={link.id}
+                href={link.href}
                 onClick={() => setIsOpen(false)}
+                data-testid={`link-${link.id}-mobile`}
+                className={`navigation__mobile-link w-fit text-lg font-medium transition-colors ${
+                  active
+                    ? 'text-primary font-bold'
+                    : 'text-foreground hover:text-primary'
+                }`}
               >
-                <button
-                  data-testid="button-launch-app-mobile"
-                  className="font-heading bg-primary text-primary-foreground hover:bg-primary/90 flex w-full items-center justify-center gap-2 rounded-full py-3.5 text-base font-bold shadow-lg transition-all"
-                >
-                  <Sparkles className="h-5 w-5" />
-                  Consult Spirit Guide
-                </button>
+                {link.label}
               </a>
-            </div>
+            );
+          })}
+          <div className="border-border/40 border-t pt-4">
+            <a
+              href="/app"
+              className="block w-full"
+              onClick={() => setIsOpen(false)}
+            >
+              <button
+                data-testid="button-launch-app-mobile"
+                className="font-heading bg-primary text-primary-foreground hover:bg-primary/90 flex w-full items-center justify-center gap-2 rounded-full py-3.5 text-base font-bold shadow-lg transition-all"
+              >
+                <Sparkles className="h-5 w-5" />
+                Consult Spirit Guide
+              </button>
+            </a>
           </div>
         </div>
       )}
