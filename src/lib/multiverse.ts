@@ -56,7 +56,7 @@ export function computeMultiverseSeed(
   return hashToUint32(payload);
 }
 
-const RESONANCE_TEMPERATURE_LEVELS = [0.8, 1.0, 1.2] as const;
+const RESONANCE_TEMPERATURE_LEVELS = [0.6, 0.75, 0.9] as const;
 
 export function selectResonanceTemperature(phase: number, velocity: number): number {
   const angle = (Math.atan2(phase, velocity) + 2 * Math.PI) % (2 * Math.PI);
