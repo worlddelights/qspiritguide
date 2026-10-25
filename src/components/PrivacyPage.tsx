@@ -71,7 +71,7 @@ export default function PrivacyPage() {
               </div>
               <h3 className="font-heading text-xl font-bold">Cloudflare Security</h3>
               <p className="text-muted-foreground text-sm leading-relaxed">
-                We use privacy-friendly Cloudflare Turnstile bot protection to secure static page delivery without utilizing invasive tracking cookies.
+                Cloudflare Pages delivers the static site. The application does not use accounts, server-side APIs, or application analytics.
               </p>
             </div>
           </motion.div>

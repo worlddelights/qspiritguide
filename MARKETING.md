@@ -106,7 +106,7 @@ graph TD
   * **Zero Cost:** No paywalls, premium plans, or ads.
   * **Local Processing:** The AI model runs in your browser.
   * **Local Storage:** Conversations save only to your device.
-  * **Privacy-First Access:** Turnstile integration keeps the site secure without Google reCAPTCHA's browser tracking.
+  * **Privacy-First Access:** Browser-native processing and local-only conversation storage keep personal reflection out of server-side application systems.
 
 ### 6. Interactive Journey Preview (How It Works)
 * **Objective:** Give a simple 1-2-3 guide on how the tool is used.

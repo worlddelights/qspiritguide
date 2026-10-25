@@ -5,9 +5,8 @@
 # Technology and Architecture
 
 - Use Node.js 24 or newer and pnpm for dependency management and scripts.
-- Build the frontend with Astro and TypeScript; deploy it to Cloudflare Pages.
-- Implement serverless APIs in `functions/` as Cloudflare Workers. Store persistent data in Cloudflare D1 and sessions or temporary data in Cloudflare KV.
-- Protect sensitive flows with Cloudflare Turnstile and validate tokens server-side.
-- Keep Astro routes in `src/pages/`, reusable components in `src/components/`, layouts in `src/layouts/`, and shared environment bindings in `src/env.d.ts`.
-- Configure Astro in `astro.config.mjs`, Cloudflare resources in `wrangler.toml`, and D1 schema changes in `migrations/`.
-- Use `pnpm run dev`, `pnpm run build`, `pnpm run workers:dev`, and `pnpm run workers:deploy` for local development, builds, and Worker deployment.
+- Build the browser-only frontend with Astro, TypeScript, and React. Deploy generated static assets to Cloudflare Pages.
+- Keep Astro routes in `src/pages/`, reusable React components in `src/components/`, layouts in `src/layouts/`, styles in `src/styles/`, and static assets plus archetype prompts in `public/`.
+- The app's AI inference and persisted conversation data stay in the browser. Do not add server-side authentication, APIs, analytics, or data storage without an explicit product decision.
+- Configure the static build in `astro.config.mjs`. The GitHub Actions deployment workflow builds `dist/` and uploads it to Cloudflare Pages.
+- Use `pnpm run dev`, `pnpm run build`, `pnpm run lint`, and `pnpm run format` for local development and validation.

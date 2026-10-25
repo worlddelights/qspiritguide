@@ -14,7 +14,7 @@ export default function GuidePage() {
     },
     {
       q: 'What is the "Multiverse Navigation" metaphor?',
-      a: 'While life may seem random, we believe there is a hidden guiding hand at play still. To connect with it, simply avoid overthinking the synchronization rituatal and select symbols that surface in your awareness. Naturally, there are no wrong choices here and thus focus on relaxing and enjoying the experience, whatever it surfaces.',
+      a: 'While life may seem random, we believe The Quantum Field always guides you. To connect with it explicitly, simply avoid overthinking the synchronization ritual. Select any three symbols that surface in your awareness, and consider clicking the resonance wheel with your eyes closed. Naturally, there are no wrong choices here so just relax and enjoy the experience, whatever it surfaces.',
     },
     {
       q: 'How do I get the best guidance from the browser LLM?',
