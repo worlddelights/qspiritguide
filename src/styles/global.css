@@ -964,7 +964,7 @@ svg:not([role='img']) {
   white-space: nowrap;
 }
 
-.quantum-dialogue__privacy {
+.quantum-dialogue__model {
   display: flex;
   align-items: center;
   gap: 0.35rem;

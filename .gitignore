@@ -37,6 +37,3 @@ yarn-error.log*
 # Cloudflare
 .wrangler/
 wrangler.log
-
-# Temporary until new models are trained
-public/models/*

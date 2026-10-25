@@ -12,10 +12,35 @@ const QuantumDialogue = lazy(() => import('./QuantumDialogue'));
 
 type AppStage = 'probe' | 'ritual' | 'transition' | 'materializing' | 'error' | 'dialogue';
 
+const MODEL_CONFIGS = {
+  '1B-WebGPU': {
+    modelId: 'Llama-3.2-1B-Instruct',
+    displayName: 'Llama 3.2 1B',
+    useWebGPU: true,
+    dtype: 'q4f16',
+  },
+  '360M-WebGPU': {
+    modelId: 'SmolLM2-360M-Instruct',
+    displayName: 'SmolLM2 360M',
+    useWebGPU: true,
+    dtype: 'q4f16',
+  },
+  '135M-WASM': {
+    modelId: 'SmolLM2-135M-Instruct',
+    displayName: 'SmolLM2 135M',
+    useWebGPU: false,
+    dtype: 'int8',
+  },
+} satisfies Record<
+  DeviceCapabilityReport['recommendedTier'],
+  { modelId: string; displayName: string; useWebGPU: boolean; dtype: string }
+>;
+
 export default function AppPage() {
   const [stage, setStage] = useState<AppStage>('probe');
   const [capabilities, setCapabilities] = useState<DeviceCapabilityReport | null>(null);
   const [modelStatus, setModelStatus] = useState<string>('Detecting capabilities...');
+  const [selectedModelName, setSelectedModelName] = useState('');
   const [isModelReady, setIsModelReady] = useState(false);
   const [modelError, setModelError] = useState<string | null>(null);
 
@@ -31,6 +56,9 @@ export default function AppPage() {
 
   const initializeWorker = (report: DeviceCapabilityReport) => {
     if (workerRef.current) return;
+
+    const { modelId, displayName, useWebGPU, dtype } = MODEL_CONFIGS[report.recommendedTier];
+    setSelectedModelName(displayName);
 
     workerRef.current = new Worker(new URL('../workers/llmWorker.ts', import.meta.url), {
       type: 'module',
@@ -67,15 +95,9 @@ export default function AppPage() {
       }
     };
 
-    const modelConfig = {
-      '1B-WebGPU': { modelId: 'Llama-3.2-1B-Instruct', useWebGPU: true, dtype: 'q4f16' },
-      '360M-WebGPU': { modelId: 'SmolLM2-360M-Instruct', useWebGPU: true, dtype: 'q4f16' },
-      '135M-WASM': { modelId: 'SmolLM2-135M-Instruct', useWebGPU: false, dtype: 'int8' },
-    }[report.recommendedTier];
-
     workerRef.current.postMessage({
       type: 'init',
-      payload: modelConfig,
+      payload: { modelId, useWebGPU, dtype },
     });
   };
 
@@ -83,6 +105,7 @@ export default function AppPage() {
     detectDeviceCapabilities().then((report) => {
       setCapabilities(report);
       setModelStatus('Device analyzed. Select three symbols to begin...');
+      initializeWorker(report);
       setStage('ritual');
     });
 
@@ -144,7 +167,6 @@ export default function AppPage() {
       if (!capabilities) {
         throw new Error('Device capabilities are not available');
       }
-      initializeWorker(capabilities);
 
       if (isModelReady) {
         window.setTimeout(() => setStage('dialogue'), 1800);
@@ -316,6 +338,7 @@ export default function AppPage() {
               >
                 <QuantumDialogue
                   signature={sessionInfo?.signature || ''}
+                  modelName={selectedModelName}
                   messages={messages}
                   isGenerating={isGenerating}
                   streamingText={streamingText}

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Send, ShieldCheck, RotateCcw, Sparkles } from 'lucide-react';
+import { Cpu, Send, RotateCcw, Sparkles } from 'lucide-react';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -7,6 +7,7 @@ interface Message {
 }
 
 type ChatFontSize = 'small' | 'medium' | 'large';
+const FONT_SIZE_STORAGE_KEY = 'qspiritguide-chat-font-size';
 
 const FONT_SIZE_OPTIONS: { value: ChatFontSize; label: string }[] = [
   { value: 'small', label: 'Small' },
@@ -14,8 +15,12 @@ const FONT_SIZE_OPTIONS: { value: ChatFontSize; label: string }[] = [
   { value: 'large', label: 'Large' },
 ];
 
+const isChatFontSize = (value: string | null): value is ChatFontSize =>
+  FONT_SIZE_OPTIONS.some((option) => option.value === value);
+
 interface QuantumDialogueProps {
   signature: string;
+  modelName: string;
   onReset: () => void;
   messages: Message[];
   onSendMessage: (msg: string) => void;
@@ -25,6 +30,7 @@ interface QuantumDialogueProps {
 
 export default function QuantumDialogue({
   signature,
+  modelName,
   onReset,
   messages,
   onSendMessage,
@@ -33,7 +39,31 @@ export default function QuantumDialogue({
 }: QuantumDialogueProps) {
   const [input, setInput] = useState('');
   const [fontSize, setFontSize] = useState<ChatFontSize>('medium');
+  const [hasLoadedFontSize, setHasLoadedFontSize] = useState(false);
   const messagesRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    try {
+      const savedFontSize = window.localStorage.getItem(FONT_SIZE_STORAGE_KEY);
+      if (isChatFontSize(savedFontSize)) {
+        setFontSize(savedFontSize);
+      }
+    } catch (error) {
+      console.error('Unable to load saved chat text size:', error);
+    } finally {
+      setHasLoadedFontSize(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!hasLoadedFontSize) return;
+
+    try {
+      window.localStorage.setItem(FONT_SIZE_STORAGE_KEY, fontSize);
+    } catch (error) {
+      console.error('Unable to save chat text size:', error);
+    }
+  }, [fontSize, hasLoadedFontSize]);
 
   useEffect(() => {
     const messagesElement = messagesRef.current;
@@ -59,9 +89,9 @@ export default function QuantumDialogue({
       <div className="quantum-dialogue__hud">
         <div className="flex items-center gap-3">
           <div className="quantum-dialogue__signature">{signature}</div>
-          <div className="quantum-dialogue__privacy">
-            <ShieldCheck className="h-4 w-4" />
-            100% Off-Grid <span className="hidden sm:inline">• Local model active</span>
+          <div className="quantum-dialogue__model" aria-label={`Model: ${modelName}`}>
+            <Cpu className="h-4 w-4" />
+            {modelName}
           </div>
         </div>
         <div className="quantum-dialogue__actions">
