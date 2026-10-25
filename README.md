@@ -131,9 +131,15 @@ Cloudflare Pages publishes automatically from GitHub Actions on every push to `m
 
 MIT
 
-## Local AI Models
+## Browser AI Models
 
-The app runs bundled models locally in the browser. **Built with Llama.** The Llama 3.2
-Community License and Acceptable Use Policy are included with the model under
-`public/models/Llama-3.2-1B-Instruct/`. SmolLM2 models are licensed under Apache-2.0;
-each model directory includes a copy of that license.
+The app downloads its Transformers.js-compatible ONNX models directly from public
+[Hugging Face Hub](https://huggingface.co/onnx-community) repositories. Downloads are
+pinned to specific Hub revisions and may be cached by the browser. Inference runs locally;
+prompts are not sent to Hugging Face or a remote inference service.
+
+The available models are [Llama 3.2 1B](https://huggingface.co/onnx-community/Llama-3.2-1B-Instruct-ONNX),
+[SmolLM2 360M](https://huggingface.co/onnx-community/SmolLM2-360M-Instruct-ONNX), and
+[SmolLM2 135M](https://huggingface.co/onnx-community/SmolLM2-135M-Instruct-ONNX).
+Llama 3.2's Community License and Acceptable Use Policy apply; both are available in its
+Hub repository. The SmolLM2 models are licensed under Apache-2.0.

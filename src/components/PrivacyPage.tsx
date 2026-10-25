@@ -41,7 +41,7 @@ export default function PrivacyPage() {
               </div>
               <h3 className="font-heading text-xl font-bold">100% Local AI Processing</h3>
               <p className="text-muted-foreground text-sm leading-relaxed">
-                The mini LLM model runs directly in your web browser using WebGPU/transformers.js. Your prompts, inputs, and generated replies are processed locally on your CPU/GPU and never sent to any remote server.
+                The mini LLM runs in your browser using WebGPU/transformers.js. Public model files are downloaded from Hugging Face Hub, but your prompts and generated replies are processed locally and are not sent to Hugging Face or a remote inference service.
               </p>
             </div>
 

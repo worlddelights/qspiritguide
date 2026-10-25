@@ -6,7 +6,7 @@ export default function GuidePage() {
   const faqs = [
     {
       q: 'How does qSpirit Guide work without sending data to servers?',
-      a: 'qSpirit Guide leverages modern WebGPU and WebAssembly technologies through transformers.js. The AI neural network model downloads directly into your browser memory once, and all token generation happens locally on your computer GPU/CPU.',
+      a: 'qSpirit Guide uses transformers.js with WebGPU or WebAssembly. Model files are downloaded from public Hugging Face Hub repositories and may be cached by your browser. Your prompts and generated replies stay in your browser; token generation runs locally on your computer.',
     },
     {
       q: 'Is it really completely free with zero signups?',

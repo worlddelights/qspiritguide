@@ -1,10 +1,7 @@
 import { pipeline, env, TextStreamer } from '@huggingface/transformers';
 
-// Use local models from public/models/
-env.allowLocalModels = true;
-env.allowRemoteModels = false;
-env.localModelPath = '/models/';
-// Depending on environment, might need to set local/remote paths, but default works for HF Hub.
+env.allowLocalModels = false;
+env.allowRemoteModels = true;
 
 let generator: any = null;
 let currentModelId = '';
@@ -14,15 +11,16 @@ self.addEventListener('message', async (e) => {
 
   if (type === 'init') {
     try {
-      const { modelId, useWebGPU, dtype } = payload;
+      const { modelId, revision, useWebGPU, dtype } = payload;
       currentModelId = modelId;
       self.postMessage({ type: 'status', status: 'loading-runtime', message: 'Loading local inference runtime...' });
       self.postMessage({ type: 'status', message: `Loading model...` });
-      self.postMessage({ type: 'status', status: 'loading-model', message: 'Loading local model...' });
+      self.postMessage({ type: 'status', status: 'loading-model', message: 'Downloading model from Hugging Face...' });
 
       generator = await pipeline('text-generation', modelId, {
         device: useWebGPU ? 'webgpu' : 'wasm',
         dtype,
+        revision,
         progress_callback: (prog: any) => {
           self.postMessage({ type: 'progress', payload: prog });
         }

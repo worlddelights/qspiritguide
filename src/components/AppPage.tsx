@@ -14,26 +14,29 @@ type AppStage = 'probe' | 'ritual' | 'transition' | 'materializing' | 'error' | 
 
 const MODEL_CONFIGS = {
   '1B-WebGPU': {
-    modelId: 'Llama-3.2-1B-Instruct',
+    modelId: 'onnx-community/Llama-3.2-1B-Instruct-ONNX',
+    revision: '14007543b6dc92de88daf96a9aa85d2f95ace6ef',
     displayName: 'Built with Llama',
     useWebGPU: true,
     dtype: 'q4f16',
   },
   '360M-WebGPU': {
-    modelId: 'SmolLM2-360M-Instruct',
+    modelId: 'onnx-community/SmolLM2-360M-Instruct-ONNX',
+    revision: 'fe7c7db4c8921c9e3fa1c65cfd296fb3b1b1a8f9',
     displayName: 'SmolLM2 360M',
     useWebGPU: true,
     dtype: 'q4f16',
   },
   '135M-WASM': {
-    modelId: 'SmolLM2-135M-Instruct',
+    modelId: 'onnx-community/SmolLM2-135M-Instruct-ONNX',
+    revision: 'b8a5c0f183b78c55955a5364f610c36668b5e681',
     displayName: 'SmolLM2 135M',
     useWebGPU: false,
     dtype: 'int8',
   },
 } satisfies Record<
   DeviceCapabilityReport['recommendedTier'],
-  { modelId: string; displayName: string; useWebGPU: boolean; dtype: string }
+  { modelId: string; revision: string; displayName: string; useWebGPU: boolean; dtype: string }
 >;
 
 export default function AppPage() {
@@ -57,7 +60,8 @@ export default function AppPage() {
   const initializeWorker = (report: DeviceCapabilityReport) => {
     if (workerRef.current) return;
 
-    const { modelId, displayName, useWebGPU, dtype } = MODEL_CONFIGS[report.recommendedTier];
+    const { modelId, revision, displayName, useWebGPU, dtype } =
+      MODEL_CONFIGS[report.recommendedTier];
     setSelectedModelName(displayName);
 
     workerRef.current = new Worker(new URL('../workers/llmWorker.ts', import.meta.url), {
@@ -97,7 +101,7 @@ export default function AppPage() {
 
     workerRef.current.postMessage({
       type: 'init',
-      payload: { modelId, useWebGPU, dtype },
+      payload: { modelId, revision, useWebGPU, dtype },
     });
   };
 
