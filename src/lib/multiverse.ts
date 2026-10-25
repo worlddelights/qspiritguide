@@ -9,7 +9,7 @@ export interface MultiverseVector {
 
   // Computed randomizer & sampling outputs
   seed32: number; // uint32 ∈ [0, 4294967295]
-  temperature: number; // e.g. 0.65 - 0.85
+  temperature: number; // Selected from resonance-based levels between 0.8 and 1.2
   topP: number; // e.g. 0.85 - 0.95
 
   // Archetype indexing
@@ -54,4 +54,13 @@ export function computeMultiverseSeed(
 ): number {
   const payload = `${symbols.join(':')}|${phase.toFixed(6)}|${velocity.toFixed(6)}|${elapsedMs}`;
   return hashToUint32(payload);
+}
+
+const RESONANCE_TEMPERATURE_LEVELS = [0.8, 1.0, 1.2] as const;
+
+export function selectResonanceTemperature(phase: number, velocity: number): number {
+  const angle = (Math.atan2(phase, velocity) + 2 * Math.PI) % (2 * Math.PI);
+  const levelIndex = Math.floor((angle / (2 * Math.PI)) * RESONANCE_TEMPERATURE_LEVELS.length);
+
+  return RESONANCE_TEMPERATURE_LEVELS[levelIndex];
 }

@@ -7,6 +7,9 @@ export default defineConfig({
   site: 'https://qspirit.guide',
   integrations: [react()],
   vite: {
+    resolve: {
+      conditions: ['onnxruntime-web-use-extern-wasm'],
+    },
     plugins: [tailwindcss()],
   },
 });

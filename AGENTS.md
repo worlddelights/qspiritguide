@@ -4,7 +4,7 @@
 
 # Technology and Architecture
 
-- Use Node.js 22.12.0 or newer and pnpm for dependency management and scripts.
+- Use Node.js 24 or newer and pnpm for dependency management and scripts.
 - Build the frontend with Astro and TypeScript; deploy it to Cloudflare Pages.
 - Implement serverless APIs in `functions/` as Cloudflare Workers. Store persistent data in Cloudflare D1 and sessions or temporary data in Cloudflare KV.
 - Protect sensitive flows with Cloudflare Turnstile and validate tokens server-side.

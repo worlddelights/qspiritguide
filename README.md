@@ -35,13 +35,13 @@ A browser-based guide built with **Astro** and published as a static site on **C
 
 ### Frontend
 
-- **Astro**: Static site generation
-* **TypeScript**: Type-safe JavaScript throughout
-* **Cloudflare Pages**: Static hosting with GitHub Actions deployments from `main`
+**Astro**: Static site generation
+**TypeScript**: Type-safe JavaScript throughout
+**Cloudflare Pages**: Static hosting with GitHub Actions deployments from `main`
 
 ## 📋 Prerequisites
 
-* Node.js 22.12.0 or newer and pnpm
+* Node.js 24 or newer and pnpm
 
 ## 🚀 Quick Start
 
@@ -71,7 +71,7 @@ Push a change to `main`; GitHub Actions builds the static site and deploys `dist
 
 ## 📁 Project Structure
 
-```
+```bash
 qspiritguide/
 ├── public/                   # Static assets
 ├── src/
@@ -135,8 +135,10 @@ MIT
 
 The app downloads its Transformers.js-compatible ONNX models directly from public
 [Hugging Face Hub](https://huggingface.co/onnx-community) repositories. Downloads are
-pinned to specific Hub revisions and may be cached by the browser. Inference runs locally;
-prompts are not sent to Hugging Face or a remote inference service.
+pinned to specific Hub revisions and may be cached by the browser. During downloads, the app
+displays overall progress; repeat visits can use the browser cache and may skip most or all of
+the download. Inference runs locally; prompts are not sent to Hugging Face or a remote
+inference service.
 
 The available models are [Llama 3.2 1B](https://huggingface.co/onnx-community/Llama-3.2-1B-Instruct-ONNX),
 [SmolLM2 360M](https://huggingface.co/onnx-community/SmolLM2-360M-Instruct-ONNX), and

@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Cpu, Send, RotateCcw, Sparkles } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -20,6 +21,7 @@ const isChatFontSize = (value: string | null): value is ChatFontSize =>
 
 interface QuantumDialogueProps {
   signature: string;
+  temperature: number;
   modelName: string;
   onReset: () => void;
   messages: Message[];
@@ -30,6 +32,7 @@ interface QuantumDialogueProps {
 
 export default function QuantumDialogue({
   signature,
+  temperature,
   modelName,
   onReset,
   messages,
@@ -89,6 +92,12 @@ export default function QuantumDialogue({
       <div className="quantum-dialogue__hud">
         <div className="flex items-center gap-3">
           <div className="quantum-dialogue__signature">{signature}</div>
+          <span
+            className="quantum-dialogue__temperature"
+            aria-label={`Temperature ${temperature.toFixed(1)}`}
+          >
+            • {temperature.toFixed(1)}
+          </span>
           <div className="quantum-dialogue__model" aria-label={`Model: ${modelName}`}>
             <Cpu className="h-4 w-4" />
             {modelName}
@@ -157,7 +166,9 @@ export default function QuantumDialogue({
             <div
               className={`quantum-dialogue__message ${msg.role === 'user' ? 'quantum-dialogue__message--user' : 'quantum-dialogue__message--guide'}`}
             >
-              <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+              <div className="quantum-dialogue__message-content">
+                <ReactMarkdown>{msg.content}</ReactMarkdown>
+              </div>
             </div>
           </div>
         ))}
@@ -165,10 +176,13 @@ export default function QuantumDialogue({
         {isGenerating && (
           <div className="flex justify-start">
             <div className="quantum-dialogue__message quantum-dialogue__message--guide">
-              <p className="whitespace-pre-wrap leading-relaxed">
-                {streamingText}
-                <span className="inline-block w-2 h-4 bg-primary ml-1 animate-pulse align-middle" />
-              </p>
+              <div className="quantum-dialogue__message-content">
+                <ReactMarkdown>{streamingText}</ReactMarkdown>
+                <span
+                  className="inline-block w-2 h-4 bg-primary ml-1 animate-pulse align-middle"
+                  aria-hidden="true"
+                />
+              </div>
             </div>
           </div>
         )}

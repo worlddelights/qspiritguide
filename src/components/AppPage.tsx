@@ -2,7 +2,12 @@ import { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { Loader2 } from 'lucide-react';
 import Navigation from './Navigation';
 import { detectDeviceCapabilities, type DeviceCapabilityReport } from '../lib/capabilities';
-import { computeMultiverseSeed, createSeededPrng, hashToUint32 } from '../lib/multiverse';
+import {
+  computeMultiverseSeed,
+  createSeededPrng,
+  hashToUint32,
+  selectResonanceTemperature,
+} from '../lib/multiverse';
 import { v4 as uuidv4 } from 'uuid';
 import { saveSession, type VaultSession } from '../lib/db';
 import type { ResonanceCapture } from './SynchronicityRitual';
@@ -11,6 +16,7 @@ const SynchronicityRitual = lazy(() => import('./SynchronicityRitual'));
 const QuantumDialogue = lazy(() => import('./QuantumDialogue'));
 
 type AppStage = 'probe' | 'ritual' | 'transition' | 'materializing' | 'error' | 'dialogue';
+type ModelLoadProgress = { percent: number; file: string | null };
 
 const MODEL_CONFIGS = {
   '1B-WebGPU': {
@@ -46,6 +52,7 @@ export default function AppPage() {
   const [selectedModelName, setSelectedModelName] = useState('');
   const [isModelReady, setIsModelReady] = useState(false);
   const [modelError, setModelError] = useState<string | null>(null);
+  const [modelProgress, setModelProgress] = useState<ModelLoadProgress | null>(null);
 
   const workerRef = useRef<Worker | null>(null);
   const pendingDialogueRef = useRef(false);
@@ -69,10 +76,27 @@ export default function AppPage() {
     });
 
     workerRef.current.onmessage = (e) => {
-      const { type, message, error, text } = e.data;
+      const { type, message, error, text, payload } = e.data;
       if (type === 'status') setModelStatus(message);
+      if (type === 'progress') {
+        const progress = payload as {
+          status?: unknown;
+          progress?: unknown;
+          file?: unknown;
+        };
+        if (
+          (progress.status === 'progress_total' || progress.status === 'progress') &&
+          typeof progress.progress === 'number'
+        ) {
+          setModelProgress({
+            percent: Math.min(100, Math.max(0, progress.progress)),
+            file: typeof progress.file === 'string' ? progress.file.split('/').at(-1) ?? null : null,
+          });
+        }
+      }
       if (type === 'ready') {
         setIsModelReady(true);
+        setModelProgress(null);
         setModelStatus('Local Spirit Guide ready.');
         setStage((currentStage) => {
           if (currentStage === 'materializing' && pendingDialogueRef.current) {
@@ -136,6 +160,10 @@ export default function AppPage() {
         resonanceCapture.velocity,
         resonanceCapture.elapsedMs
       );
+      const temperature = selectResonanceTemperature(
+        resonanceCapture.phase,
+        resonanceCapture.velocity
+      );
       const primary = symbols[0];
       const res = await fetch(`/prompts/archetypes/${primary}.json`);
       if (!res.ok) {
@@ -162,6 +190,7 @@ export default function AppPage() {
         id: uuidv4(),
         signature,
         seed32,
+        temperature,
         symbols,
         promptId: selectedPrompt.id,
         resonanceCapture,
@@ -200,7 +229,7 @@ export default function AppPage() {
       type: 'generate',
       payload: {
         messages: formattedMessages,
-        temperature: 0.75,
+        temperature: sessionInfo.temperature,
         topP: 0.9,
         seed32: sessionInfo.seed32,
       },
@@ -214,6 +243,31 @@ export default function AppPage() {
     setSessionInfo(null);
     setStage('ritual');
   };
+
+  const modelProgressIndicator = modelProgress && !isModelReady && (
+    <div className="w-full max-w-sm space-y-2 text-left" aria-live="polite">
+      <div className="flex justify-between gap-4 text-sm">
+        <span>A first awakening: gathering the guide's essence</span>
+        <span>{Math.round(modelProgress.percent)}%</span>
+      </div>
+      <div
+        className="h-2 overflow-hidden rounded-full bg-white/20"
+        role="progressbar"
+        aria-label="Model download progress"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={Math.round(modelProgress.percent)}
+      >
+        <div
+          className="h-full rounded-full bg-cyan-300 transition-[width] duration-200"
+          style={{ width: `${modelProgress.percent}%` }}
+        />
+      </div>
+      <p className="text-xs text-white/70">
+        Usually needed only on your first visit; your browser can keep the guide ready for next time.
+      </p>
+    </div>
+  );
 
   useEffect(() => {
     if (stage !== 'dialogue' || !sessionInfo || hasRequestedGreetingRef.current) return;
@@ -232,7 +286,7 @@ export default function AppPage() {
               'Offer a brief, warm opening reflection that welcomes the seeker to this dialogue. Do not ask more than one gentle opening question.',
           },
         ],
-        temperature: 0.75,
+        temperature: sessionInfo.temperature,
         topP: 0.9,
         seed32: sessionInfo.seed32,
       },
@@ -288,6 +342,7 @@ export default function AppPage() {
               >
                 <SynchronicityRitual onComplete={handleRitualComplete} />
               </Suspense>
+              {modelProgressIndicator}
             </div>
           )}
 
@@ -309,6 +364,7 @@ export default function AppPage() {
                 <Loader2 className="w-12 h-12 animate-spin text-cyan-300" />
                 <h2>Spirit Guide is still materializing...</h2>
                 <p>{modelStatus}</p>
+                {modelProgressIndicator}
               </div>
             </div>
           )}
@@ -342,6 +398,7 @@ export default function AppPage() {
               >
                 <QuantumDialogue
                   signature={sessionInfo?.signature || ''}
+                  temperature={sessionInfo?.temperature ?? 0.8}
                   modelName={selectedModelName}
                   messages={messages}
                   isGenerating={isGenerating}
