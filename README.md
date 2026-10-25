@@ -90,8 +90,9 @@ qspiritguide/
 
 1. Create a Pages project named `qspiritguide` with `main` as its production branch. Use direct uploads; the GitHub Actions workflow in this repository handles builds and deployments.
 2. In that Pages project's **Custom domains** settings, attach `qspirit.guide`.
-3. Create a Cloudflare API token with permission to edit Pages for the target account.
-4. Add `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` as GitHub Actions repository secrets.
+3. Create a Cloudflare API token scoped to the target account with **Account → Cloudflare Pages → Edit** permission only. Set the token to expire after one year.
+4. Before the token expires, create a replacement with the same **Cloudflare Pages → Edit** scope and update the `CLOUDFLARE_API_TOKEN` GitHub Actions secret. Expired tokens must be recreated; they cannot be renewed.
+5. Add `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` as GitHub Actions repository secrets.
 
 The workflow deploys the `qspiritguide` Pages project on each push to `main`; Cloudflare serves it at the attached `https://qspirit.guide` custom domain. It builds with `pnpm build` and uploads only generated `dist/` static assets.
 
