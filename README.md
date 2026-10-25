@@ -229,6 +229,13 @@ pnpm run workers:deploy
 
 MIT
 
+## Local AI Models
+
+The app runs bundled models locally in the browser. **Built with Llama.** The Llama 3.2
+Community License and Acceptable Use Policy are included with the model under
+`public/models/Llama-3.2-1B-Instruct/`. SmolLM2 models are licensed under Apache-2.0;
+each model directory includes a copy of that license.
+
 ## Themes under consideration
 
 <https://astro.build/themes/details/purfectly-zen/>
