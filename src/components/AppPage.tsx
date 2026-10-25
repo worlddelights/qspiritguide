@@ -15,7 +15,7 @@ type AppStage = 'probe' | 'ritual' | 'transition' | 'materializing' | 'error' | 
 const MODEL_CONFIGS = {
   '1B-WebGPU': {
     modelId: 'Llama-3.2-1B-Instruct',
-    displayName: 'Llama 3.2 1B',
+    displayName: 'Built with Llama',
     useWebGPU: true,
     dtype: 'q4f16',
   },
