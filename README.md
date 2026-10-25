@@ -235,15 +235,3 @@ The app runs bundled models locally in the browser. **Built with Llama.** The Ll
 Community License and Acceptable Use Policy are included with the model under
 `public/models/Llama-3.2-1B-Instruct/`. SmolLM2 models are licensed under Apache-2.0;
 each model directory includes a copy of that license.
-
-## Themes under consideration
-
-<https://astro.build/themes/details/purfectly-zen/>
-
-<https://astro.build/themes/details/airy-personal-page/>
-
-<https://www.astrothemes.dev/theme/twbs-bootstrap/>
-
-## Great Transformers.js example
-
-<https://huggingface.co/spaces/webml-community/Nemotron-3-Nano-WebGPU/tree/main/src>

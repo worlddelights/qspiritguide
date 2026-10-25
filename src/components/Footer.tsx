@@ -65,6 +65,17 @@ export default function Footer() {
                   Privacy & Safeguards
                 </a>
               </li>
+              <li>
+                <a
+                  href="https://github.com/worlddelights/qspiritguide"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  data-testid="link-footer-github"
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                >
+                  View source & contribute
+                </a>
+              </li>
             </ul>
           </div>
 

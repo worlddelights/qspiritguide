@@ -20,6 +20,24 @@ export default function GuidePage() {
       q: 'How do I get the best guidance from the browser LLM?',
       a: 'Be specific about the decision or dilemma you are facing. Share your core values, concerns, and open questions. The guide will help ask reflective questions to clarify your path.',
     },
+    {
+      q: 'How can I get in touch or share a request or concern?',
+      a: (
+        <>
+          Submit a{' '}
+          <a
+            href="https://github.com/worlddelights/qspiritguide/issues/new"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary underline underline-offset-4 hover:opacity-80"
+          >
+            GitHub Issue
+          </a>{' '}
+          in the qSpirit Guide repository. You can use an issue to share a
+          request, report a problem, or raise a concern.
+        </>
+      ),
+    },
   ];
 
   return (
