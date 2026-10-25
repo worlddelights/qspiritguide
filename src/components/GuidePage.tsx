@@ -6,7 +6,7 @@ export default function GuidePage() {
   const faqs = [
     {
       q: 'How does qSpirit Guide work without sending data to servers?',
-      a: 'qSpirit Guide uses transformers.js with WebGPU or WebAssembly. Model files are downloaded from public Hugging Face Hub repositories and may be cached by your browser. Your prompts and generated replies stay in your browser; token generation runs locally on your computer.',
+      a: 'qSpirit Guide uses LLM AI that runs exclusively in the browser on your device. We use transformers.js with model files downloaded from public Hugging Face Hub servers and then cached by your browser. Your prompts and generated replies stay only in your browser.',
     },
     {
       q: 'Is it really completely free with zero signups?',
@@ -14,7 +14,7 @@ export default function GuidePage() {
     },
     {
       q: 'What is the "Multiverse Navigation" metaphor?',
-      a: 'We use the multiverse framework as a practical psychological tool for exploring alternative life choices, career pivots, and potential futures without fear of making a "wrong" move.',
+      a: 'While life may seem random, we believe there is a hidden guiding hand at play still. To connect with it, simply avoid overthinking the synchronization rituatal and select symbols that surface in your awareness. Naturally, there are no wrong choices here and thus focus on relaxing and enjoying the experience, whatever it surfaces.',
     },
     {
       q: 'How do I get the best guidance from the browser LLM?',
