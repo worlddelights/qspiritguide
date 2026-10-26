@@ -15,7 +15,7 @@ self.addEventListener('message', async (e) => {
       currentModelId = modelId;
       self.postMessage({ type: 'status', status: 'loading-runtime', message: 'Loading local inference runtime...' });
       self.postMessage({ type: 'status', message: `Loading model...` });
-      self.postMessage({ type: 'status', status: 'loading-model', message: 'Downloading model from Hugging Face...' });
+      self.postMessage({ type: 'status', status: 'loading-model', message: 'Hugging Face assisting in first-time Sprit Guide manifestation...' });
 
       generator = await pipeline('text-generation', modelId, {
         device: useWebGPU ? 'webgpu' : 'wasm',
@@ -48,6 +48,7 @@ self.addEventListener('message', async (e) => {
         max_new_tokens: 512,
         temperature: temperature || 0.75,
         top_p: topP || 0.9,
+        repetition_penalty: 1.11,
         seed: seed32,
         do_sample: true,
         streamer: streamer,
