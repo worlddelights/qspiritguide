@@ -32,6 +32,7 @@ export default function SynchronicityRitual({ onComplete }: RitualProps) {
   const [isSealing, setIsSealing] = useState(false);
   const sealTimerRef = useRef<number | null>(null);
   const symbolsRef = useRef<HTMLDivElement>(null);
+  const resonanceRef = useRef<HTMLDivElement>(null);
 
   useEffect(
     () => () => {
@@ -52,6 +53,12 @@ export default function SynchronicityRitual({ onComplete }: RitualProps) {
       setSigilStartedAt(performance.now());
     }
   }, [selectedSymbols.length, sigilStartedAt]);
+
+  useEffect(() => {
+    if (selectedSymbols.length === 3 && window.matchMedia('(max-width: 48rem)').matches) {
+      resonanceRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [selectedSymbols.length]);
 
   const activeRole = ROLE_LABELS[selectedSymbols.length] ?? null;
   const constellationComplete = selectedSymbols.length === 3;
@@ -210,6 +217,7 @@ export default function SynchronicityRitual({ onComplete }: RitualProps) {
           </div>
 
           <div
+            ref={resonanceRef}
             className={`resonance-sigil ${constellationComplete ? 'is-ready' : ''} ${resonanceCapture ? 'is-sealed' : ''}`}
           >
             <div className="resonance-sigil__orbit resonance-sigil__orbit--outer" />

@@ -1314,10 +1314,6 @@ svg:not([role='img']) {
     gap: 1.5rem;
   }
 
-  .resonance-sigil {
-    grid-row: 1;
-  }
-
   .forest-ritual__roles {
     gap: 0.25rem;
   }
