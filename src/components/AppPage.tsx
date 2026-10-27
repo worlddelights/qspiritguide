@@ -67,8 +67,19 @@ export default function AppPage() {
   const initializeWorker = useCallback((report: DeviceCapabilityReport) => {
     if (workerRef.current) return;
 
+    const searchParams = new URLSearchParams(window.location.search);
+    const modelOverride = searchParams.get('m');
+    let modelTier = report.recommendedTier;
+    if (modelOverride === '135') {
+      modelTier = '135M-WASM';
+    } else if (modelOverride === '360') {
+      modelTier = '360M-WebGPU';
+    } else if (searchParams.has('m')) {
+      console.warn('Unsupported model override. Use ?m=135 or ?m=360.');
+    }
+
     const { modelId, revision, displayName, useWebGPU, dtype } =
-      MODEL_CONFIGS[report.recommendedTier];
+      MODEL_CONFIGS[modelTier];
     setSelectedModelName(displayName);
 
     workerRef.current = new Worker(new URL('../workers/llmWorker.ts', import.meta.url), {
@@ -403,7 +414,7 @@ export default function AppPage() {
               >
                 <QuantumDialogue
                   signature={sessionInfo?.signature || ''}
-                  temperature={sessionInfo?.temperature ?? 0.8}
+                  temperature={sessionInfo?.temperature ?? 0.88}
                   modelName={selectedModelName}
                   messages={messages}
                   isGenerating={isGenerating}
