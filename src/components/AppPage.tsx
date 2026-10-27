@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, lazy, Suspense } from 'react';
+import { useState, useEffect, useRef, useCallback, lazy, Suspense } from 'react';
 import { Loader2 } from 'lucide-react';
 import Navigation from './Navigation';
 import { detectDeviceCapabilities, type DeviceCapabilityReport } from '../lib/capabilities';
@@ -64,7 +64,7 @@ export default function AppPage() {
   const [streamingText, setStreamingText] = useState('');
   const [sessionInfo, setSessionInfo] = useState<any>(null);
 
-  const initializeWorker = (report: DeviceCapabilityReport) => {
+  const initializeWorker = useCallback((report: DeviceCapabilityReport) => {
     if (workerRef.current) return;
 
     const { modelId, revision, displayName, useWebGPU, dtype } =
@@ -127,20 +127,25 @@ export default function AppPage() {
       type: 'init',
       payload: { modelId, revision, useWebGPU, dtype },
     });
-  };
+  }, []);
 
   useEffect(() => {
     detectDeviceCapabilities().then((report) => {
       setCapabilities(report);
       setModelStatus('Device analyzed. Select three symbols to begin...');
-      initializeWorker(report);
       setStage('ritual');
     });
 
     return () => {
       if (workerRef.current) workerRef.current.terminate();
     };
-  }, []);
+  }, [initializeWorker]);
+
+  useEffect(() => {
+    if (stage === 'materializing' && capabilities && pendingDialogueRef.current) {
+      initializeWorker(capabilities);
+    }
+  }, [stage, capabilities, initializeWorker]);
 
   const handleRitualComplete = async (
     symbols: [string, string, string],
