@@ -416,6 +416,7 @@ export default function AppPage() {
                   signature={sessionInfo?.signature || ''}
                   temperature={sessionInfo?.temperature ?? 0.88}
                   modelName={selectedModelName}
+                  smoothScroll={selectedModelName !== MODEL_CONFIGS['135M-WASM'].displayName}
                   messages={messages}
                   isGenerating={isGenerating}
                   streamingText={streamingText}

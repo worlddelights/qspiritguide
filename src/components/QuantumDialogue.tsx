@@ -28,6 +28,7 @@ interface QuantumDialogueProps {
   onSendMessage: (msg: string) => void;
   isGenerating: boolean;
   streamingText: string;
+  smoothScroll: boolean;
 }
 
 export default function QuantumDialogue({
@@ -39,6 +40,7 @@ export default function QuantumDialogue({
   onSendMessage,
   isGenerating,
   streamingText,
+  smoothScroll,
 }: QuantumDialogueProps) {
   const [input, setInput] = useState('');
   const [fontSize, setFontSize] = useState<ChatFontSize>('medium');
@@ -71,12 +73,14 @@ export default function QuantumDialogue({
   useEffect(() => {
     const messagesElement = messagesRef.current;
     if (messagesElement) {
-      messagesElement.scrollTo({
-        top: messagesElement.scrollHeight,
-        behavior: 'smooth',
-      });
+      const scrollTop = messagesElement.scrollHeight;
+      if (smoothScroll) {
+        messagesElement.scrollTo({ top: scrollTop, behavior: 'smooth' });
+      } else {
+        messagesElement.scrollTop = scrollTop;
+      }
     }
-  }, [messages, streamingText]);
+  }, [messages, streamingText, smoothScroll]);
 
   const handleSend = () => {
     if (!input.trim() || isGenerating) return;
