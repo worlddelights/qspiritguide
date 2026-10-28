@@ -107,8 +107,8 @@ const Hero = () => {
               <Users size={20} />
             </div>
             <div>
-              <p className="text-sm font-bold">500K+ Explorers</p>
-              <p className="text-muted-foreground text-xs">Vast web network</p>
+              <p className="text-sm font-bold">Quantum Spirit Guide</p>
+              <p className="text-muted-foreground text-xs">Free Consultation</p>
             </div>
           </div>
         </div>
