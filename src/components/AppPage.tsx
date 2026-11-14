@@ -78,6 +78,64 @@ export default function AppPage() {
     return null;
   };
 
+  // Crash marker: an iOS jetsam kill leaves no JS trace — the tab just
+  // reloads and the app restarts at the ritual, so a kill looks exactly
+  // like a fresh visit. Remember the last attempted tier in localStorage;
+  // if the previous visit died mid-load or mid-generation, the next visit
+  // starts one tier lower instead of walking into the same kill. The
+  // marker is cleared as soon as a generation completes, and ignored when
+  // older than two hours (e.g. the user just closed the tab mid-greeting).
+  // A `?m=` override always wins over the marker: an explicit user choice
+  // is not second-guessed.
+  const CRASH_MARKER_KEY = 'qspirit_last_model_attempt';
+  const CRASH_MARKER_MAX_AGE_MS = 2 * 60 * 60 * 1000;
+  type CrashMarker = {
+    tier: DeviceCapabilityReport['recommendedTier'];
+    phase: 'loading' | 'ready' | 'generating';
+    ts: number;
+  };
+  const readCrashMarker = (): CrashMarker | null => {
+    try {
+      const raw = window.localStorage.getItem(CRASH_MARKER_KEY);
+      if (!raw) return null;
+      const marker = JSON.parse(raw) as CrashMarker;
+      if (!marker || typeof marker.ts !== 'number') return null;
+      if (Date.now() - marker.ts > CRASH_MARKER_MAX_AGE_MS) return null;
+      return marker;
+    } catch {
+      return null;
+    }
+  };
+  const writeCrashMarker = (
+    tier: DeviceCapabilityReport['recommendedTier'],
+    phase: CrashMarker['phase']
+  ): void => {
+    try {
+      window.localStorage.setItem(
+        CRASH_MARKER_KEY,
+        JSON.stringify({ tier, phase, ts: Date.now() })
+      );
+    } catch {
+      // Private mode etc. — the marker is best-effort.
+    }
+  };
+  const clearCrashMarker = (): void => {
+    try {
+      window.localStorage.removeItem(CRASH_MARKER_KEY);
+    } catch {
+      // Best-effort.
+    }
+  };
+  const TIER_ORDER: Record<DeviceCapabilityReport['recommendedTier'], number> = {
+    '1B-WebGPU': 2,
+    '360M-WASM': 1,
+    '135M-WASM': 0,
+  };
+  const smallerTier = (
+    a: DeviceCapabilityReport['recommendedTier'],
+    b: DeviceCapabilityReport['recommendedTier']
+  ): DeviceCapabilityReport['recommendedTier'] => (TIER_ORDER[a] <= TIER_ORDER[b] ? a : b);
+
   // Chat state
   const [messages, setMessages] = useState<any[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -109,6 +167,7 @@ export default function AppPage() {
         }
       }
       currentTierRef.current = modelTier;
+      writeCrashMarker(modelTier, 'loading');
 
       // Silently retry on the next smaller tier when this tier fails to
       // load; only the 135M floor failing shows the error screen.
@@ -165,6 +224,7 @@ export default function AppPage() {
       }
       if (type === 'ready') {
         isModelReadyRef.current = true;
+        writeCrashMarker(modelTier, 'ready');
         setIsModelReady(true);
         setModelProgress(null);
         setModelStatus('Local Spirit Guide ready.');
@@ -191,9 +251,12 @@ export default function AppPage() {
         );
       }
       if (type === 'token') {
+        writeCrashMarker(modelTier, 'generating');
         setStreamingText((prev) => prev + text);
       }
       if (type === 'complete') {
+        // A completed generation proves this tier can run on this device.
+        clearCrashMarker();
         setMessages((prev) => [...prev, { role: 'assistant', content: text }]);
         setStreamingText('');
         setIsGenerating(false);
@@ -208,6 +271,14 @@ export default function AppPage() {
 
   useEffect(() => {
     detectDeviceCapabilities().then((report) => {
+      // If the last visit died mid-load or mid-generation (a jetsam kill
+      // delivers no error, so the fallback chain never sees it), start one
+      // tier lower this time instead of walking into the same kill.
+      const marker = readCrashMarker();
+      if (marker && (marker.phase === 'loading' || marker.phase === 'generating')) {
+        const steppedDown = fallbackTierFor(marker.tier) ?? marker.tier;
+        report.recommendedTier = smallerTier(report.recommendedTier, steppedDown);
+      }
       setCapabilities(report);
       setModelStatus('Device analyzed. Select three symbols to begin...');
       setStage('ritual');

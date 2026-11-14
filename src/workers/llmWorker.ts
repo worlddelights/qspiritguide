@@ -31,6 +31,43 @@ self.addEventListener('message', async (e) => {
     try {
       const { modelId, revision, useWebGPU, dtype } = payload;
       currentModelId = modelId;
+
+      if (!useWebGPU) {
+        // WebKit 26 (iOS 26) + the ONNX Runtime build transformers.js loads
+        // by default = tab killed mid-inference. transformers.js 4.3.1
+        // loads ort-wasm-simd-threaded.asyncify.{mjs,wasm} from
+        // onnxruntime-web, and that build's JS glue contains the JSEP
+        // execution-provider code. On WebKit 26 the JSEP build leaks memory
+        // (1GB+ and still growing after inference, CPU 400%+) until iOS
+        // jetsam-kills the tab — microsoft/onnxruntime#26827 — which
+        // matches the observed symptom exactly: model loads, a few tokens
+        // arrive, then the tab resets or the browser crashes, with no JS
+        // error ever delivered. The plain threaded build contains no JSEP
+        // code at all (0 references, verified against the 1.31.0-dev dist)
+        // and is the build transformers.js itself uses on Safari below 26,
+        // so force it for every WASM session. WebGPU sessions are
+        // untouched — they need the JSEP EP. Keep the version in sync with
+        // the onnxruntime-web version @huggingface/transformers 4.3.1 loads
+        // (its package.json pin; transformers' own `versions.web`).
+        try {
+          const ortVersion = '1.31.0-dev.20260914-8d85527a0';
+          const base = `https://cdn.jsdelivr.net/npm/onnxruntime-web@${ortVersion}/dist/`;
+          const onnx = (
+            env as unknown as {
+              backends?: { onnx?: { wasm?: { wasmPaths?: { mjs: string; wasm: string } } } };
+            }
+          ).backends?.onnx;
+          if (onnx?.wasm) {
+            onnx.wasm.wasmPaths = {
+              mjs: `${base}ort-wasm-simd-threaded.mjs`,
+              wasm: `${base}ort-wasm-simd-threaded.wasm`,
+            };
+          }
+        } catch {
+          // Fall back to transformers.js's default build choice.
+        }
+      }
+
       self.postMessage({ type: 'status', status: 'loading-runtime', message: 'Loading local inference runtime...' });
       self.postMessage({ type: 'status', message: `Loading model...` });
       self.postMessage({ type: 'status', status: 'loading-model', message: 'Hugging Face assisting in first-time Sprit Guide manifestation...' });
