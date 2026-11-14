@@ -50,12 +50,14 @@ The dialogue HUD displays a session signature, selected local model, and tempera
 | Tier | Runtime | Model |
 | --- | --- | --- |
 | `1B-WebGPU` | WebGPU | `onnx-community/Llama-3.2-1B-Instruct-ONNX` |
-| `360M-WebGPU` | WebGPU | `onnx-community/SmolLM2-360M-Instruct-ONNX` |
-| `135M-WASM` | WASM fallback | `onnx-community/SmolLM2-135M-Instruct-ONNX` |
+| `360M-WASM` | WASM | `onnx-community/SmolLM2-360M-Instruct-ONNX` (int8) |
+| `135M-WASM` | WASM | `onnx-community/SmolLM2-135M-Instruct-ONNX` (int8) |
 
-[`llmWorker.ts`](src/workers/llmWorker.ts) loads the selected revision through `@huggingface/transformers`, reports download progress, and streams generated tokens to the UI.
+There is only one mid tier: `360M-WASM`. iOS/iPadOS never gets WebGPU (Safari's WebGPU is unstable for ONNX Runtime and iOS jetsam-kills tabs at ~2GB), so iPhones and iPads start on `360M-WASM`. Desktop gets `1B-WebGPU` when WebGPU is available, otherwise `360M-WASM`. Android gets `1B-WebGPU` only on flagships (WebGPU + 8GB+ reported RAM + 8+ cores — Chrome on Android is the one mobile browser that actually reports `navigator.deviceMemory`); other Android devices get `360M-WASM`, and <=2GB reported RAM goes straight to `135M-WASM`. The `?m=` override selects a tier directly: `?m=135`, `?m=360` (the WASM mid tier), `?m=1b`.
 
-If the ritual completes before model initialization, the app shows the Materializing state until the worker is ready. If initialization, prompt loading, or generation fails, the app shows an error with a full-page reload retry.
+[`llmWorker.ts`](src/workers/llmWorker.ts) loads the selected revision through `@huggingface/transformers`, reports download progress, and streams generated tokens to the UI. When the page is not cross-origin isolated (no COOP/COEP headers), the worker pins WASM to a single thread (`numThreads = 1`) instead of letting the threaded WASM init half-break.
+
+If the ritual completes before model initialization, the app shows the Materializing state until the worker is ready. If a tier fails to load, the app silently retries the next smaller tier (`1B-WebGPU` -> `360M-WASM` -> `135M-WASM`) without showing an error; the error screen with a full-page reload retry only appears if the `135M-WASM` floor also fails. A model-cache miss is not a failure: transformers.js simply re-downloads the model.
 
 ## Persistence and accessibility
 
@@ -76,5 +78,5 @@ If the ritual completes before model initialization, the app shows the Materiali
 
 - The app has no vault browser, export flow, or UI for deleting saved conversations.
 - There is no context-window compaction; the full in-memory message history is sent for each generation.
-- Error recovery is a page reload, not in-place retry or user-selectable tier fallback.
+- Error recovery for model loading is a silent in-place tier fallback (see above); only the 135M floor failing shows the error screen with a page-reload retry. There is no user-selectable tier fallback in the UI beyond the `?m=` URL override.
 - IndexedDB writes retain the current session as messages arrive; reset only clears React state.

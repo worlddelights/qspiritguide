@@ -26,12 +26,16 @@ const MODEL_CONFIGS = {
     useWebGPU: true,
     dtype: 'q4f16',
   },
-  '360M-WebGPU': {
+  // Mid tier: SmolLM2-360M on WASM with int8. int8 is the WASM dtype for
+  // this model — its int8 file (346MB) is smaller than its q4 file (369MB)
+  // and higher quality. q4f16 is a WebGPU dtype and is not used here.
+  // There is deliberately only one mid tier; ?m=360 selects this one.
+  '360M-WASM': {
     modelId: 'onnx-community/SmolLM2-360M-Instruct-ONNX',
     revision: 'fe7c7db4c8921c9e3fa1c65cfd296fb3b1b1a8f9',
     displayName: 'SmolLM2 360M',
-    useWebGPU: true,
-    dtype: 'q4f16',
+    useWebGPU: false,
+    dtype: 'int8',
   },
   '135M-WASM': {
     modelId: 'onnx-community/SmolLM2-135M-Instruct-ONNX',
@@ -55,8 +59,24 @@ export default function AppPage() {
   const [modelProgress, setModelProgress] = useState<ModelLoadProgress | null>(null);
 
   const workerRef = useRef<Worker | null>(null);
+  const currentTierRef = useRef<DeviceCapabilityReport['recommendedTier'] | null>(null);
+  const isModelReadyRef = useRef(false);
   const pendingDialogueRef = useRef(false);
   const hasRequestedGreetingRef = useRef(false);
+
+  // Silent fallback chain for model *load* failures: 1B -> 360M-WASM ->
+  // 135M-WASM. A failed download, or a device that cannot hold the model,
+  // must never surface as a visible error while a smaller tier is untried —
+  // the user just sees the guide keep materializing. Only when the 135M
+  // floor also fails do we show the error screen. (A cache miss is not a
+  // failure at all: transformers.js simply re-downloads the model.)
+  const fallbackTierFor = (
+    failedTier: DeviceCapabilityReport['recommendedTier']
+  ): DeviceCapabilityReport['recommendedTier'] | null => {
+    if (failedTier === '1B-WebGPU') return '360M-WASM';
+    if (failedTier === '360M-WASM') return '135M-WASM';
+    return null;
+  };
 
   // Chat state
   const [messages, setMessages] = useState<any[]>([]);
@@ -64,29 +84,67 @@ export default function AppPage() {
   const [streamingText, setStreamingText] = useState('');
   const [sessionInfo, setSessionInfo] = useState<any>(null);
 
-  const initializeWorker = useCallback((report: DeviceCapabilityReport) => {
-    if (workerRef.current) return;
+  const initializeWorker = useCallback(
+    (report: DeviceCapabilityReport, tierOverride?: DeviceCapabilityReport['recommendedTier']) => {
+      // Terminate any previous worker first (a failed tier, or a re-init).
+      if (workerRef.current) {
+        workerRef.current.terminate();
+        workerRef.current = null;
+      }
+      isModelReadyRef.current = false;
 
-    const searchParams = new URLSearchParams(window.location.search);
-    const modelOverride = searchParams.get('m');
-    let modelTier = report.recommendedTier;
-    if (modelOverride === '135') {
-      modelTier = '135M-WASM';
-    } else if (modelOverride === '360') {
-      modelTier = '360M-WebGPU';
-    } else if (searchParams.has('m')) {
-      console.warn('Unsupported model override. Use ?m=135 or ?m=360.');
-    }
+      const searchParams = new URLSearchParams(window.location.search);
+      const modelOverride = searchParams.get('m');
+      let modelTier = tierOverride ?? report.recommendedTier;
+      if (!tierOverride) {
+        if (modelOverride === '135') {
+          modelTier = '135M-WASM';
+        } else if (modelOverride === '360') {
+          // ?m=360 means the WASM mid tier (SmolLM2-360M, int8).
+          modelTier = '360M-WASM';
+        } else if (modelOverride === '1b') {
+          modelTier = '1B-WebGPU';
+        } else if (searchParams.has('m')) {
+          console.warn('Unsupported model override. Use ?m=135, ?m=360 or ?m=1b.');
+        }
+      }
+      currentTierRef.current = modelTier;
 
-    const { modelId, revision, displayName, useWebGPU, dtype } =
-      MODEL_CONFIGS[modelTier];
-    setSelectedModelName(displayName);
+      // Silently retry on the next smaller tier when this tier fails to
+      // load; only the 135M floor failing shows the error screen.
+      const failOver = (err: unknown) => {
+        const failedTier = currentTierRef.current ?? modelTier;
+        const nextTier = fallbackTierFor(failedTier);
+        if (!nextTier) {
+          const message =
+            err instanceof Error ? err.message : String(err ?? 'Unable to initialize the Spirit Guide');
+          setModelError(message);
+          setModelStatus(`Error: ${message}`);
+          setStage((currentStage) =>
+            currentStage === 'probe' || currentStage === 'materializing' ? 'error' : currentStage
+          );
+          return;
+        }
+        setModelProgress(null);
+        setModelStatus('Preparing a lighter guide…');
+        initializeWorker(report, nextTier);
+      };
 
-    workerRef.current = new Worker(new URL('../workers/llmWorker.ts', import.meta.url), {
-      type: 'module',
-    });
+      const { modelId, revision, displayName, useWebGPU, dtype } = MODEL_CONFIGS[modelTier];
+      setSelectedModelName(displayName);
 
-    workerRef.current.onmessage = (e) => {
+      let worker: Worker;
+      try {
+        worker = new Worker(new URL('../workers/llmWorker.ts', import.meta.url), {
+          type: 'module',
+        });
+      } catch (err) {
+        failOver(err);
+        return;
+      }
+      workerRef.current = worker;
+
+      workerRef.current.onmessage = (e) => {
       const { type, message, error, text, payload } = e.data;
       if (type === 'status') setModelStatus(message);
       if (type === 'progress') {
@@ -106,6 +164,7 @@ export default function AppPage() {
         }
       }
       if (type === 'ready') {
+        isModelReadyRef.current = true;
         setIsModelReady(true);
         setModelProgress(null);
         setModelStatus('Local Spirit Guide ready.');
@@ -118,6 +177,13 @@ export default function AppPage() {
         });
       }
       if (type === 'error') {
+        // A load failure (model not ready yet) falls back silently to the
+        // next smaller tier. A failure after the model is ready (e.g. a
+        // generation error) is genuine and stays visible.
+        if (!isModelReadyRef.current) {
+          failOver(error);
+          return;
+        }
         setModelError(error);
         setModelStatus(`Error: ${error}`);
         setStage((currentStage) =>

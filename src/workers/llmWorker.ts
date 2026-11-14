@@ -3,6 +3,24 @@ import { pipeline, env, TextStreamer } from '@huggingface/transformers';
 env.allowLocalModels = false;
 env.allowRemoteModels = true;
 
+// WASM threads need SharedArrayBuffer, which needs cross-origin isolation
+// (COOP + COEP headers). This site does not send those headers, so the
+// page is not isolated and a threaded WASM init can half-break (notably on
+// Safari). Pin to a single thread when not isolated; it is slower, but it
+// loads reliably. When isolation is present, leave the default alone.
+try {
+  type OnnxBackend = { backends?: { onnx?: { wasm?: { numThreads?: number } } } };
+  const backends = (env as unknown as OnnxBackend).backends;
+  const isolated =
+    typeof self !== 'undefined' &&
+    (self as unknown as { crossOriginIsolated?: boolean }).crossOriginIsolated;
+  if (!isolated && backends?.onnx?.wasm) {
+    backends.onnx.wasm.numThreads = 1;
+  }
+} catch {
+  // Never let backend tuning break worker startup.
+}
+
 let generator: any = null;
 let currentModelId = '';
 
